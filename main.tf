@@ -236,6 +236,10 @@ resource "aws_security_group" "lambda" {
     protocol        = "-1"
     cidr_blocks     = ["0.0.0.0/0"]
   }
+
+  tags {
+    Name = "Spoke Lambda"
+  }
 }
 
 # Postgres RDS
@@ -257,6 +261,10 @@ resource "aws_security_group" "postgres" {
     to_port         = 0
     protocol        = "-1"
     cidr_blocks     = ["0.0.0.0/0"]
+  }
+
+  tags {
+    Name = "Spoke Postgres"
   }
 }
 
