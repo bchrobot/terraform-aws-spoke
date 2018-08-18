@@ -393,3 +393,33 @@ resource "aws_s3_bucket_object" "spoke_payload" {
   source = "example.zip"
   etag   = "${md5(file("example.zip"))}"
 }
+
+
+
+# Create Lambda function
+# https://www.terraform.io/docs/providers/aws/r/lambda_function.html
+resource "aws_lambda_function" "spoke" {
+  function_name = "Spoke"
+  description   = "Spoke P2P Texting Platform"
+
+  s3_bucket = "${var.spoke_domain}"
+  s3_key    = "deploy/example.zip"
+
+  handler     = "lambda.handler"
+  runtime     = "nodejs6.10"
+  memory_size = "512"
+  timeout     = "300"
+
+  role = "${aws_iam_role.spoke_lambda.arn}"
+
+  vpc_config = {
+    subnet_ids          = ["${aws_subnet.private_a.id}", "${aws_subnet.private_b.id}"]
+    security_group_ids  = ["${aws_security_group.lambda.id}"]
+  }
+
+  environment = {
+    variables = {
+      NODE_ENV = "production"
+    }
+  }
+}
