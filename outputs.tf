@@ -24,3 +24,7 @@ output "RDS Security Group" {
 output "Lambda Security Group" {
   value = "${aws_security_group.lambda.id}"
 }
+
+output "S3 Bucket Name" {
+  value = "${var.spoke_domain}"
+}

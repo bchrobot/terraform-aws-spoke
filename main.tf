@@ -41,9 +41,13 @@ resource "aws_acm_certificate" "spoke_cert" {
 
 # Create the bucket
 # Source: https://www.terraform.io/docs/providers/aws/r/s3_bucket.html
-resource "aws_s3_bucket" "b" {
-  bucket = "spoke"
+resource "aws_s3_bucket" "spoke_bucket" {
+  bucket = "${var.spoke_domain}"
   acl    = "private"
+
+  tags {
+    Name = "Spoke Bucket"
+  }
 }
 
 

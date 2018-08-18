@@ -19,7 +19,7 @@ variable "aws_region" {
 }
 
 variable "spoke_domain" {
-  description = "The domain that Spoke will be running on."
+  description = "The domain that Spoke will be running on. Also used to create a globally unique S3 bucket."
   default     = "spoke.example.com"
 }
 
