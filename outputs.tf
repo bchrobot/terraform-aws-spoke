@@ -28,3 +28,7 @@ output "Lambda Security Group" {
 output "S3 Bucket Name" {
   value = "${var.spoke_domain}"
 }
+
+output "Base URL" {
+  value = "${aws_api_gateway_deployment.spoke.invoke_url}"
+}
