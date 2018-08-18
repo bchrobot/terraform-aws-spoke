@@ -1,0 +1,83 @@
+#!/bin/bash
+
+# build_and_deploy - A script to build Spoke and deploy it using Terraform.
+
+##### Constants
+
+SPOKE_PATH=$1
+TERRAFORM_PATH=$PWD
+DEPLOY_PATH=$TERRAFORM_PATH/.deploy
+
+DATE=$(date +"%Y%m%d%H%M")
+TMP_ZIP_PATH=/tmp/spoke-server-$DATE.zip
+
+AWS_REGION="us-east-1"
+S3_BUCKET="spoke.bchrobot.io"
+
+export NODE_ENV=production
+export OUTPUT_DIR="./build"
+export PUBLIC_DIR="./build/client"
+export ASSETS_DIR="./build/client/assets"
+export STATIC_BASE_URL="https://s3.${AWS_REGION}.amazonaws.com/${S3_BUCKET}/static/"
+export BASE_URL="https://${S3_BUCKET}"
+export ASSETS_MAP_FILE="assets.json"
+
+
+##### Main
+
+# Clear out deploy folder
+rm -r $DEPLOY_PATH
+mkdir -p $DEPLOY_PATH/client
+
+# Package the application (builds server and client before zipping)
+echo -n "Packing application..."
+(
+cd $SPOKE_PATH
+NODE_ENV=production \
+    OUTPUT_DIR="./build" \
+    PUBLIC_DIR="./build/client" \
+    ASSETS_DIR="./build/client/assets" \
+    STATIC_BASE_URL="https://s3.${AWS_REGION}.amazonaws.com/${S3_BUCKET}/static/" \
+    BASE_URL="https://${S3_BUCKET}" \
+    ASSETS_MAP_FILE="assets.json" \
+    claudia pack --output $TMP_ZIP_PATH > /dev/null
+)
+echo " done"
+
+# Locate client bundle in .zip
+BUNDLE_PATH=$(unzip -l $TMP_ZIP_PATH | grep "build/client/assets/bundle" | awk '{print $4}')
+BUNDLE_FILENAME=$(basename -- "$BUNDLE_PATH")
+BUNDLE_HASH=`echo "$BUNDLE_FILENAME" | cut -d '.' -f 2`
+
+# Rename server.zip with hash for uniqueness
+SERVER_ZIP_PATH=$DEPLOY_PATH/server.$BUNDLE_HASH.zip
+cp $TMP_ZIP_PATH $SERVER_ZIP_PATH
+
+# Extract client bundle
+echo -n "Extracting client bundle for separate upload..."
+unzip -j $SERVER_ZIP_PATH $BUNDLE_PATH -d $DEPLOY_PATH/client/ > /dev/null
+echo " done"
+
+# Print completion message
+cat << EOF
+
+Bundling complete.
+
+Your bundle files are:
+
+    $SERVER_ZIP_PATH
+    $DEPLOY_PATH/client/$BUNDLE_FILENAME
+
+You may apply the changes with:
+
+    terraform apply -var 'bundle_hash=$BUNDLE_HASH'
+
+EOF
+
+
+
+# TODO: Add flag for running it automatically:
+
+# if [Run automatically]; then
+# ( cd $TERRAFORM_PATH && TF_VAR_bundle_hash="$BUNDLE_HASH" terraform apply )
+# fi

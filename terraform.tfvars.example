@@ -1,4 +1,9 @@
-aws_access_key  = "XXXXXXXXXXXXXXXXXX"
-aws_secret_key  = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-spoke_domain    = "spoke.example.com"
-rds_password    = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX5YN7"
+aws_access_key        = "XXXXXXXXXXXXXXXXXX"
+aws_secret_key        = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+spoke_domain          = "spoke.example.com"
+rds_password          = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX5YN7"
+spoke_session_secret  = "EXTRA_SECRET"
+
+spoke_auth0_domain        = "campaign.auth0.com"
+spoke_auth0_client_id     = "XXXXXXXXXXXXXXXXXX"
+spoke_auth0_client_secret = "XXXXXXXXXXXXXXXXXX"

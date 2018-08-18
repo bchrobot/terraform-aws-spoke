@@ -5,6 +5,10 @@
 # Source: https://www.terraform.io/intro/getting-started/variables.html
 
 
+########################
+# AWS Deploy Variables #
+########################
+
 variable "aws_access_key" {
   description = "AWS Access Key."
 }
@@ -50,6 +54,10 @@ variable "rds_username" {
 
 variable "rds_password" {
   description = "The password for the Postgres instance user."
+}
+
+variable "bundle_hash" {
+  description = "Hash of client bundle.js"
 }
 
 

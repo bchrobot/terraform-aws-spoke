@@ -385,14 +385,24 @@ EOF
 }
 
 
+# Upload resources
+# Source: https://www.terraform.io/docs/providers/aws/r/s3_bucket_object.html
+
+# Upload Client Resources
+resource "aws_s3_bucket_object" "client_payload" {
+  acl    = "public-read"
+  bucket = "${var.spoke_domain}"
+  key    = "static/bundle.${var.bundle_hash}.js"
+  source = "./.deploy/client/bundle.${var.bundle_hash}.js"
+  etag   = "${md5(file("./.deploy/client/bundle.${var.bundle_hash}.js"))}"
+}
 
 # Upload Lambda Function
-# Source: https://www.terraform.io/docs/providers/aws/r/s3_bucket_object.html
-resource "aws_s3_bucket_object" "spoke_payload" {
+resource "aws_s3_bucket_object" "server_payload" {
   bucket = "${var.spoke_domain}"
-  key    = "deploy/example.zip"
-  source = "example.zip"
-  etag   = "${md5(file("example.zip"))}"
+  key    = "deploy/server.${var.bundle_hash}.zip"
+  source = "./.deploy/server.${var.bundle_hash}.zip"
+  etag   = "${md5(file("./.deploy/server.${var.bundle_hash}.zip"))}"
 }
 
 
@@ -403,8 +413,9 @@ resource "aws_lambda_function" "spoke" {
   function_name = "Spoke"
   description   = "Spoke P2P Texting Platform"
 
-  s3_bucket = "${var.spoke_domain}"
-  s3_key    = "deploy/example.zip"
+  depends_on  = ["aws_s3_bucket_object.server_payload"]
+  s3_bucket   = "${var.spoke_domain}"
+  s3_key      = "deploy/server.${var.bundle_hash}.zip"
 
   handler     = "lambda.handler"
   runtime     = "nodejs6.10"
@@ -431,7 +442,7 @@ resource "aws_lambda_function" "spoke" {
       OUTPUT_DIR = "./build"
       PUBLIC_DIR = "./build/client"
       ASSETS_DIR = "./build/client/assets"
-      STATIC_BASE_URL = "https://s3.${var.aws_region}.amazonaws.com/${var.spoke_domain}/static/"
+      STATIC_BASE_URL = "https://s3.amazonaws.com/${var.spoke_domain}/static/"
       BASE_URL = "https://${var.spoke_domain}"
       S3_STATIC_PATH = "s3://${var.spoke_domain}/static/"
       ASSETS_MAP_FILE = "assets.json"
