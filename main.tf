@@ -310,54 +310,75 @@ resource "aws_db_instance" "default" {
 
 
 
-
-
-
-
-
-
-
-# Roles
+# Create Lambda Role
 # Source: https://www.terraform.io/docs/providers/aws/r/iam_role.html
-# Source: https://www.terraform.io/docs/providers/aws/r/iam_role_policy.html
+resource "aws_iam_role" "spoke_lambda" {
+  name = "SpokeOnLambda"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+
+
+# Attach Policies to Role
 # Source: https://www.terraform.io/docs/providers/aws/r/iam_role_policy_attachment.html
 
-# S3 Role/Policy
+# AWSLambdaRole
+resource "aws_iam_role_policy_attachment" "aws_lambda" {
+    role       = "${aws_iam_role.spoke_lambda.name}"
+    policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaRole"
+}
 
-# resource "aws_iam_role_policy" "lambda_s3" {
-#   name = "LambdaS3"
-#   role = "${aws_iam_role.lambda_s3.id}"
+# AWSLambdaVPCAccessExecutionRole
+resource "aws_iam_role_policy_attachment" "aws_lambda_vpc_access_execution" {
+    role       = "${aws_iam_role.spoke_lambda.name}"
+    policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
 
-#   policy = <<EOF
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Effect": "Allow",
-#       "Action": "s3:*",
-#       "Resource": "*"
-#     }
-#   ]
-# }
-# EOF
-# }
+# AmazonS3FullAccess
+resource "aws_iam_role_policy_attachment" "s3_full_access" {
+    role       = "${aws_iam_role.spoke_lambda.name}"
+    policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+}
 
-# resource "aws_iam_role" "test_role" {
-#   name = "SpokeOnLambda"
+# Inline Policy
+# Source: https://www.terraform.io/docs/providers/aws/r/iam_role_policy.html
+resource "aws_iam_role_policy" "vpc_access_execution" {
+  name = "vpc-access-execution"
+  role = "${aws_iam_role.spoke_lambda.name}"
 
-#   assume_role_policy = <<EOF
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Action": "sts:AssumeRole",
-#       "Principal": {
-#         "Service": "ec2.amazonaws.com"
-#       },
-#       "Effect": "Allow",
-#       "Sid": ""
-#     }
-#   ]
-# }
-# EOF
-# }
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VPCAccessExecutionPermission",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "ec2:CreateNetworkInterface",
+        "ec2:DeleteNetworkInterface",
+        "ec2:DescribeNetworkInterfaces"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}
