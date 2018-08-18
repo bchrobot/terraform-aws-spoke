@@ -291,7 +291,7 @@ resource "aws_db_subnet_group" "postgres" {
 
 # Create RDS Postgres instance
 # Source: https://www.terraform.io/docs/providers/aws/r/db_instance.html
-resource "aws_db_instance" "default" {
+resource "aws_db_instance" "spoke" {
   allocated_storage      = "${var.rds_size}"
   storage_type           = "gp2"
   engine                 = "postgres"
@@ -304,6 +304,7 @@ resource "aws_db_instance" "default" {
   option_group_name      = "default:postgres-10"
   parameter_group_name   = "default.postgres10"
   publicly_accessible    = true
+  skip_final_snapshot    = true
   db_subnet_group_name   = "${aws_db_subnet_group.postgres.name}"
   vpc_security_group_ids = ["${aws_security_group.postgres.id}"]
 }
@@ -420,6 +421,60 @@ resource "aws_lambda_function" "spoke" {
   environment = {
     variables = {
       NODE_ENV = "production"
+      JOBS_SAME_PROCESS = "1"
+      SUPPRESS_SEED_CALLS = "${var.spoke_suppress_seed}"
+      SUPPRESS_SELF_INVITE = "${var.spoke_suppress_self_invite}"
+      AWS_ACCESS_AVAILABLE = "1"
+      AWS_S3_BUCKET_NAME = "${var.spoke_domain}"
+      APOLLO_OPTICS_KEY = ""
+      DEFAULT_SERVICE = "${var.spoke_default_service}"
+      OUTPUT_DIR = "./build"
+      PUBLIC_DIR = "./build/client"
+      ASSETS_DIR = "./build/client/assets"
+      STATIC_BASE_URL = "https://s3.${var.aws_region}.amazonaws.com/${var.spoke_domain}/static/"
+      BASE_URL = "https://${var.spoke_domain}"
+      S3_STATIC_PATH = "s3://${var.spoke_domain}/static/"
+      ASSETS_MAP_FILE = "assets.json"
+      DB_HOST = "${aws_db_instance.spoke.address}"
+      DB_PORT = "${aws_db_instance.spoke.port}"
+      DB_NAME = "${aws_db_instance.spoke.name}"
+      DB_USER = "${aws_db_instance.spoke.username}"
+      DB_PASSWORD = "${var.rds_password}"
+      DB_TYPE = "pg"
+      DB_KEY = ""
+      PGSSLMODE = "require"
+      AUTH0_DOMAIN = "${var.spoke_auth0_domain}"
+      AUTH0_CLIENT_ID = "${var.spoke_auth0_client_id}"
+      AUTH0_CLIENT_SECRET = "${var.spoke_auth0_client_secret}"
+      SESSION_SECRET = "${var.spoke_session_secret}"
+      NEXMO_API_KEY = "${var.spoke_nexmo_api_key}"
+      NEXMO_API_SECRET = "${var.spoke_nexmo_api_secret}"
+      TWILIO_API_KEY = "${var.spoke_twilio_api_key}"
+      TWILIO_MESSAGE_SERVICE_SID = "${var.spoke_twilio_message_service_sid}"
+      TWILIO_APPLICATION_SID = "${var.spoke_twilio_message_service_sid}"
+      TWILIO_AUTH_TOKEN = "${var.spoke_twilio_auth_token}"
+      TWILIO_STATUS_CALLBACK_URL = "${var.spoke_twilio_status_callback_url}"
+      EMAIL_HOST = "${var.spoke_email_host}"
+      EMAIL_HOST_PASSWORD = "${var.spoke_email_host_password}"
+      EMAIL_HOST_USER = "${var.spoke_email_host_user}"
+      EMAIL_HOST_PORT = "${var.spoke_email_host_port}"
+      EMAIL_FROM = "${var.spoke_email_from}"
+      ROLLBAR_CLIENT_TOKEN = "${var.spoke_rollbar_client_token}"
+      ROLLBAR_ACCESS_TOKEN = "${var.spoke_rollbar_client_token}"
+      ROLLBAR_ENDPOINT = "${var.spoke_rollbar_endpoint}"
+      DST_REFERENCE_TIMEZONE = "${var.spoke_timezone}"
+      TZ = "${var.spoke_timezone}"
+      ACTION_HANDLERS = "${var.spoke_action_handlers}"
+      AK_BASEURL = "${var.spoke_ak_baseurl}"
+      AK_SECRET = "${var.spoke_ak_secret}"
+      MAILGUN_API_KEY = "${var.spoke_mailgun_api_key}"
+      MAILGUN_DOMAIN = "${var.spoke_mailgun_domain}"
+      MAILGUN_PUBLIC_KEY = "${var.spoke_mailgun_public_key}"
+      MAILGUN_SMTP_LOGIN = "${var.spoke_mailgun_smtp_login}"
+      MAILGUN_SMTP_PASSWORD = "${var.spoke_mailgun_smtp_password}"
+      MAILGUN_SMTP_PORT = "${var.spoke_mailgun_smtp_port}"
+      MAILGUN_SMTP_SERVER = "${var.spoke_mailgun_smtp_server}"
+      LAMBDA_DEBUG_LOG = "${var.spoke_lambda_debug}"
     }
   }
 }
