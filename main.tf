@@ -395,6 +395,7 @@ resource "aws_s3_bucket_object" "client_payload" {
   key    = "static/bundle.${var.bundle_hash}.js"
   source = "./.deploy/client/bundle.${var.bundle_hash}.js"
   etag   = "${md5(file("./.deploy/client/bundle.${var.bundle_hash}.js"))}"
+  depends_on = ["aws_s3_bucket.spoke_bucket"]
 }
 
 # Upload Lambda Function
@@ -403,6 +404,7 @@ resource "aws_s3_bucket_object" "server_payload" {
   key    = "deploy/server.${var.bundle_hash}.zip"
   source = "./.deploy/server.${var.bundle_hash}.zip"
   etag   = "${md5(file("./.deploy/server.${var.bundle_hash}.zip"))}"
+  depends_on = ["aws_s3_bucket.spoke_bucket"]
 }
 
 
@@ -460,11 +462,11 @@ resource "aws_lambda_function" "spoke" {
       SESSION_SECRET = "${var.spoke_session_secret}"
       NEXMO_API_KEY = "${var.spoke_nexmo_api_key}"
       NEXMO_API_SECRET = "${var.spoke_nexmo_api_secret}"
-      TWILIO_API_KEY = "${var.spoke_twilio_api_key}"
+      TWILIO_API_KEY = "${var.spoke_twilio_account_sid}"
       TWILIO_MESSAGE_SERVICE_SID = "${var.spoke_twilio_message_service_sid}"
       TWILIO_APPLICATION_SID = "${var.spoke_twilio_message_service_sid}"
       TWILIO_AUTH_TOKEN = "${var.spoke_twilio_auth_token}"
-      TWILIO_STATUS_CALLBACK_URL = "${var.spoke_twilio_status_callback_url}"
+      TWILIO_STATUS_CALLBACK_URL = "https://${var.spoke_domain}/twilio-message-report"
       EMAIL_HOST = "${var.spoke_email_host}"
       EMAIL_HOST_PASSWORD = "${var.spoke_email_host_password}"
       EMAIL_HOST_USER = "${var.spoke_email_host_user}"

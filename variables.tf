@@ -102,8 +102,8 @@ variable "spoke_default_service" {
 
 ## Twilio
 
-variable "spoke_twilio_api_key" {
-  description = "Twilio API key."
+variable "spoke_twilio_account_sid" {
+  description = "Twilio Account SID."
   default     = ""
 }
 
@@ -114,11 +114,6 @@ variable "spoke_twilio_auth_token" {
 
 variable "spoke_twilio_message_service_sid" {
   description = "Twilio Message Service SID."
-  default     = ""
-}
-
-variable "spoke_twilio_status_callback_url" {
-  description = "Twilio status callback URL."
   default     = ""
 }
 
