@@ -180,6 +180,31 @@ resource "aws_route_table" "private" {
 
 
 
+# Add Subnets to Route Tables
+# Source: https://www.terraform.io/docs/providers/aws/r/route_table_association.html
+
+# Public Route Table
+resource "aws_route_table_association" "public_a" {
+  subnet_id      = "${aws_subnet.public_a.id}"
+  route_table_id = "${aws_route_table.public.id}"
+}
+resource "aws_route_table_association" "public_b" {
+  subnet_id      = "${aws_subnet.public_b.id}"
+  route_table_id = "${aws_route_table.public.id}"
+}
+
+# Private Route Table
+resource "aws_route_table_association" "private_a" {
+  subnet_id      = "${aws_subnet.private_a.id}"
+  route_table_id = "${aws_route_table.private.id}"
+}
+resource "aws_route_table_association" "private_b" {
+  subnet_id      = "${aws_subnet.private_b.id}"
+  route_table_id = "${aws_route_table.private.id}"
+}
+
+
+
 # Create Security Groups
 # Source: https://www.terraform.io/docs/providers/aws/r/security_group.html
 
