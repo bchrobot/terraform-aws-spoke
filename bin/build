@@ -58,9 +58,7 @@ echo -n "Extracting client bundle for separate upload..."
 unzip -j $SERVER_ZIP_PATH $BUNDLE_PATH -d $DEPLOY_PATH/client/ > /dev/null
 echo " done"
 
-# Print completion message
-cat << EOF
-
+SUCCESS_MESSAGE="
 Bundling complete.
 
 Your bundle files are:
@@ -71,13 +69,13 @@ Your bundle files are:
 You may apply the changes with:
 
     terraform apply -var 'bundle_hash=$BUNDLE_HASH'
+"
 
-EOF
+# TODO: Add real flag for running it automatically
+RUN_AUTOMATICALLY=false
 
-
-
-# TODO: Add flag for running it automatically:
-
-# if [Run automatically]; then
-# ( cd $TERRAFORM_PATH && TF_VAR_bundle_hash="$BUNDLE_HASH" terraform apply )
-# fi
+if [ $RUN_AUTOMATICALLY = true ]; then
+   echo "Run 'terraform apply' automatically"
+else
+    echo "$SUCCESS_MESSAGE"
+fi
