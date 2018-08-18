@@ -1,5 +1,11 @@
 # Usage
 
+Zip demo app:
+
+```sh
+$ ( cd example && zip ../example.zip lambda.js )
+```
+
 Set variables:
 
 ```sh

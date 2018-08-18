@@ -382,3 +382,14 @@ resource "aws_iam_role_policy" "vpc_access_execution" {
 }
 EOF
 }
+
+
+
+# Upload Lambda Function
+# Source: https://www.terraform.io/docs/providers/aws/r/s3_bucket_object.html
+resource "aws_s3_bucket_object" "spoke_payload" {
+  bucket = "${var.spoke_domain}"
+  key    = "deploy/example.zip"
+  source = "example.zip"
+  etag   = "${md5(file("example.zip"))}"
+}
