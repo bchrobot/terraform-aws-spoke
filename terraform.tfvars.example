@@ -1,9 +1,21 @@
 aws_access_key        = "XXXXXXXXXXXXXXXXXX"
 aws_secret_key        = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+rds_password          = "EXTRA_SECRET_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 spoke_domain          = "spoke.example.com"
-rds_password          = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX5YN7"
-spoke_session_secret  = "EXTRA_SECRET"
+
+spoke_session_secret  = "EXTRA_SECRET_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+spoke_action_handlers = ""
 
 spoke_auth0_domain        = "campaign.auth0.com"
 spoke_auth0_client_id     = "XXXXXXXXXXXXXXXXXX"
 spoke_auth0_client_secret = "XXXXXXXXXXXXXXXXXX"
+
+spoke_twilio_account_sid          = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+spoke_twilio_auth_token           = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+spoke_twilio_message_service_sid  = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+
+# spoke_email_host          = ""
+# spoke_email_host_port     = ""
+# spoke_email_host_user     = ""
+# spoke_email_host_password = ""
+# spoke_email_from          = ""
