@@ -5,30 +5,18 @@
 # 
 # Source: https://www.terraform.io/intro/getting-started/outputs.html
 
-output "VPC ID" {
-  value = "${aws_vpc.spoke_vpc.id}"
+output "RDS Host" {
+  value = "${aws_db_instance.spoke.address}"
 }
 
-output "Public Subnets" {
-  value = "${aws_subnet.public_a.id}, ${aws_subnet.public_b.id}"
-}
-
-output "Private Subnets" {
-  value = "${aws_subnet.private_a.id}, ${aws_subnet.private_b.id}"
-}
-
-output "RDS Security Group" {
-  value = "${aws_security_group.postgres.id}"
-}
-
-output "Lambda Security Group" {
-  value = "${aws_security_group.lambda.id}"
+output "Bundle Hash" {
+  value = "${var.bundle_hash}"
 }
 
 output "S3 Bucket Name" {
   value = "${var.spoke_domain}"
 }
 
-output "Base URL" {
+output "Base API Gateway URL" {
   value = "${aws_api_gateway_deployment.spoke.invoke_url}"
 }
