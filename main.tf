@@ -259,6 +259,14 @@ resource "aws_security_group" "postgres" {
     to_port     = 5432
     protocol    = "tcp"
     self        = true
+    description = "Postgres access"
+  }
+
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
     description = "Postgres traffic from anywhere"
   }
 
@@ -410,7 +418,7 @@ resource "aws_s3_bucket_object" "server_payload" {
 
 
 # Create Lambda function
-# https://www.terraform.io/docs/providers/aws/r/lambda_function.html
+# Source: https://www.terraform.io/docs/providers/aws/r/lambda_function.html
 resource "aws_lambda_function" "spoke" {
   function_name = "Spoke"
   description   = "Spoke P2P Texting Platform"
