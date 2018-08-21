@@ -18,13 +18,11 @@ variable "aws_secret_key" {
 }
 
 variable "aws_region" {
-  description = "AWS region to launch servers."
-  default     = "us-east-1"
+  description = "AWS region to launch servers. Ex. us-east-1"
 }
 
-variable "spoke_domain" {
-  description = "The domain that Spoke will be running on. Also used to create a globally unique S3 bucket."
-  default     = "spoke.example.com"
+variable "s3_bucket_name" {
+  description = "Create a globally unique S3 bucket. Usually the same as the domain: spoke.example.com"
 }
 
 variable "rds_size" {
@@ -66,6 +64,10 @@ variable "bundle_hash" {
 ###################
 
 # Spoke
+
+variable "spoke_domain" {
+  description = "The domain that Spoke will be running on. Ex. spoke.example.com"
+}
 
 variable "spoke_suppress_seed" {
   description = "Prevent seed calls from being run automatically."

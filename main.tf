@@ -42,7 +42,7 @@ resource "aws_acm_certificate" "spoke_cert" {
 # Create the bucket
 # Source: https://www.terraform.io/docs/providers/aws/r/s3_bucket.html
 resource "aws_s3_bucket" "spoke_bucket" {
-  bucket = "${var.spoke_domain}"
+  bucket = "${var.s3_bucket_name}"
   acl    = "private"
 
   tags {
@@ -399,7 +399,7 @@ EOF
 # Upload Client Resources
 resource "aws_s3_bucket_object" "client_payload" {
   acl    = "public-read"
-  bucket = "${var.spoke_domain}"
+  bucket = "${var.s3_bucket_name}"
   key    = "static/bundle.${var.bundle_hash}.js"
   source = "./.deploy/client/bundle.${var.bundle_hash}.js"
   etag   = "${md5(file("./.deploy/client/bundle.${var.bundle_hash}.js"))}"
@@ -408,7 +408,7 @@ resource "aws_s3_bucket_object" "client_payload" {
 
 # Upload Lambda Function
 resource "aws_s3_bucket_object" "server_payload" {
-  bucket = "${var.spoke_domain}"
+  bucket = "${var.s3_bucket_name}"
   key    = "deploy/server.${var.bundle_hash}.zip"
   source = "./.deploy/server.${var.bundle_hash}.zip"
   etag   = "${md5(file("./.deploy/server.${var.bundle_hash}.zip"))}"
@@ -424,7 +424,7 @@ resource "aws_lambda_function" "spoke" {
   description   = "Spoke P2P Texting Platform"
 
   depends_on  = ["aws_s3_bucket_object.server_payload"]
-  s3_bucket   = "${var.spoke_domain}"
+  s3_bucket   = "${var.s3_bucket_name}"
   s3_key      = "deploy/server.${var.bundle_hash}.zip"
 
   handler     = "lambda.handler"
@@ -446,15 +446,15 @@ resource "aws_lambda_function" "spoke" {
       SUPPRESS_SEED_CALLS = "${var.spoke_suppress_seed}"
       SUPPRESS_SELF_INVITE = "${var.spoke_suppress_self_invite}"
       AWS_ACCESS_AVAILABLE = "1"
-      AWS_S3_BUCKET_NAME = "${var.spoke_domain}"
+      AWS_S3_BUCKET_NAME = "${var.s3_bucket_name}"
       APOLLO_OPTICS_KEY = ""
       DEFAULT_SERVICE = "${var.spoke_default_service}"
       OUTPUT_DIR = "./build"
       PUBLIC_DIR = "./build/client"
       ASSETS_DIR = "./build/client/assets"
-      STATIC_BASE_URL = "https://s3.amazonaws.com/${var.spoke_domain}/static/"
+      STATIC_BASE_URL = "https://s3.${var.aws_region}.amazonaws.com/${var.s3_bucket_name}/static/"
       BASE_URL = "https://${var.spoke_domain}"
-      S3_STATIC_PATH = "s3://${var.spoke_domain}/static/"
+      S3_STATIC_PATH = "s3://${var.s3_bucket_name}/static/"
       ASSETS_MAP_FILE = "assets.json"
       DB_HOST = "${aws_db_instance.spoke.address}"
       DB_PORT = "${aws_db_instance.spoke.port}"
