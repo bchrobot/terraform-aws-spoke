@@ -35,8 +35,8 @@ This will compile and package the Spoke server- and client-side applications and
 
 ```sh
 $ ./bin/build --path ../Spoke \
-      --domain spoke.domain.com
-      --bucket spoke.domain.com
+      --domain spoke.domain.com \
+      --bucket spoke.domain.com \
       --region us-east-1
 ```
 
