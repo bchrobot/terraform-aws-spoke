@@ -23,6 +23,33 @@ export STATIC_BASE_URL="https://s3.${AWS_REGION}.amazonaws.com/${S3_BUCKET}/stat
 export BASE_URL="https://${SPOKE_DOMAIN}"
 export ASSETS_MAP_FILE="assets.json"
 
+##### Functions
+
+usage()
+{
+    cat <<EOF
+Build the Spoke project and deploy to AWS.
+
+Requires:
+    Claudia     npm install -g claudia
+    Terraform   https://www.terraform.io/downloads.html
+
+Usage: $0 [options]
+
+    -p | --path [path]      (required) The path to the Spoke project folder.
+    -d | --domain [domain]  (required) The instance domain name. Ex: spoke.example.com
+    -b | --bucket [name]    (optional) The name of the AWS S3 bucket that Terraform will create.
+                                       This is needed during webpack compilation.
+                                       Defaults to the domain name.
+    -r | --region [region]  (optional) The AWS region to deploy in. Defaults to 'us-east-1'.
+    -a | --auto-deploy      (optional) If set, script will call 'terraform apply' with appropriate
+                                       options rather than just printing the command.
+    -y | --yes              (optional) If set, script will assume "yes" to any input prompts.
+    -h | --help             Display this help text.
+EOF
+    exit 0
+}   # end of usage
+
 ##### Main
 
 # Clear out deploy folder
