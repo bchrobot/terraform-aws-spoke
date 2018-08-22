@@ -5,7 +5,7 @@
 ##### Constants
 
 TERRAFORM_PATH=$PWD
-DEPLOY_PATH="$TERRAFORM_PATH/.deploy"
+DEPLOY_PATH="$TERRAFORM_PATH/build"
 
 DATE=$(date +"%Y%m%d%H%M")
 TMP_ZIP_PATH=/tmp/spoke-server-$DATE.zip
