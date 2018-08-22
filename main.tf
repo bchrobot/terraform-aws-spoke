@@ -400,18 +400,18 @@ EOF
 resource "aws_s3_bucket_object" "client_payload" {
   acl    = "public-read"
   bucket = "${var.s3_bucket_name}"
-  key    = "static/bundle.${var.bundle_hash}.js"
-  source = "./.deploy/client/bundle.${var.bundle_hash}.js"
-  etag   = "${md5(file("./.deploy/client/bundle.${var.bundle_hash}.js"))}"
+  key    = "static/bundle.${var.client_bundle_hash}.js"
+  source = "${var.client_bundle_location}"
+  etag   = "${md5(file("${var.client_bundle_location}"))}"
   depends_on = ["aws_s3_bucket.spoke_bucket"]
 }
 
 # Upload Lambda Function
 resource "aws_s3_bucket_object" "server_payload" {
   bucket = "${var.s3_bucket_name}"
-  key    = "deploy/server.${var.bundle_hash}.zip"
-  source = "./.deploy/server.${var.bundle_hash}.zip"
-  etag   = "${md5(file("./.deploy/server.${var.bundle_hash}.zip"))}"
+  key    = "deploy/server.zip"
+  source = "${var.server_bundle_location}"
+  etag   = "${md5(file("${var.server_bundle_location}"))}"
   depends_on = ["aws_s3_bucket.spoke_bucket"]
 }
 
@@ -423,9 +423,11 @@ resource "aws_lambda_function" "spoke" {
   function_name = "Spoke"
   description   = "Spoke P2P Texting Platform"
 
-  depends_on  = ["aws_s3_bucket_object.server_payload"]
-  s3_bucket   = "${var.s3_bucket_name}"
-  s3_key      = "deploy/server.${var.bundle_hash}.zip"
+  depends_on        = ["aws_s3_bucket_object.server_payload"]
+  s3_bucket         = "${var.s3_bucket_name}"
+  s3_key            = "deploy/server.zip"
+  source_code_hash  = "${base64sha256(file("${var.server_bundle_location}"))}"
+
 
   handler     = "lambda.handler"
   runtime     = "nodejs6.10"

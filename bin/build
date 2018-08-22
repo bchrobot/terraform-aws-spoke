@@ -63,16 +63,24 @@ gather_bundle()
     # Extract client bundle
     echo -n "Extracting client bundle for separate upload..."
     unzip -j $SERVER_ZIP_PATH $BUNDLE_PATH -d $DEPLOY_PATH/client/ > /dev/null
+    CLIENT_BUNDLE_LOCATION="$DEPLOY_PATH/client/$BUNDLE_FILENAME"
     echo " done"
 }   # end of gather_bundle
 
 terraform_command()
 {
-    local builder="terraform apply -var 'bundle_hash=$BUNDLE_HASH'"
+    local builder="terraform apply"
+    builder="$builder \\ \n"
+    builder="$builder    -var 'server_bundle_location=$SERVER_ZIP_PATH'"
+    builder="$builder \\ \n"
+    builder="$builder    -var 'client_bundle_location=$CLIENT_BUNDLE_LOCATION'"
+    builder="$builder \\ \n"
+    builder="$builder    -var 'client_bundle_hash=$BUNDLE_HASH'"
     if [ $AUTO_YES = "1" ]; then
-       builder="$builder -auto-approve"
+        builder="$builder \\ \n"
+        builder="$builder    -auto-approve"
     fi
-    echo "$builder"
+    echo -e "$builder"
 }   # end of terraform_command
 
 success_message()
@@ -87,7 +95,7 @@ Your bundle files are:
 
 You may apply the changes with:
 
-    $(terraform_command)
+$(terraform_command)
 "
 }   # end of success_message
 

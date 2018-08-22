@@ -54,8 +54,16 @@ variable "rds_password" {
   description = "The password for the Postgres instance user."
 }
 
-variable "bundle_hash" {
-  description = "Hash of client bundle.js"
+variable "server_bundle_location" {
+  description = "Path of packed server.zip"
+}
+
+variable "client_bundle_location" {
+  description = "Path of compiled bundle.[hash].js"
+}
+
+variable "client_bundle_hash" {
+  description = "Hash of client bundle.js."
 }
 
 

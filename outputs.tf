@@ -10,7 +10,7 @@ output "RDS Host" {
 }
 
 output "Bundle Hash" {
-  value = "${var.bundle_hash}"
+  value = "${var.client_bundle_hash}"
 }
 
 output "S3 Bucket Name" {
