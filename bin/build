@@ -1,29 +1,95 @@
 #!/bin/bash
-
-# build_and_deploy - A script to build Spoke and deploy it using Terraform.
+# 
+# Build Spoke and deploy it using Terraform.
 
 ##### Constants
 
-SPOKE_PATH=$1
 TERRAFORM_PATH=$PWD
-DEPLOY_PATH=$TERRAFORM_PATH/.deploy
+DEPLOY_PATH="$TERRAFORM_PATH/.deploy"
 
 DATE=$(date +"%Y%m%d%H%M")
 TMP_ZIP_PATH=/tmp/spoke-server-$DATE.zip
 
+SPOKE_PATH=
+SPOKE_DOMAIN=
+S3_BUCKET=
 AWS_REGION="us-east-1"
-S3_BUCKET="spoke.bchrobot.io"
-SPOKE_DOMAIN="spoke.bchrobot.io"
-
-export NODE_ENV=production
-export OUTPUT_DIR="./build"
-export PUBLIC_DIR="./build/client"
-export ASSETS_DIR="./build/client/assets"
-export STATIC_BASE_URL="https://s3.${AWS_REGION}.amazonaws.com/${S3_BUCKET}/static/"
-export BASE_URL="https://${SPOKE_DOMAIN}"
-export ASSETS_MAP_FILE="assets.json"
+AUTO_DEPLOY=0
+AUTO_YES=0
+LOG_LOCATION="$TERRAFORM_PATH/logs"
 
 ##### Functions
+
+build_spoke()
+{
+    # Clear out deploy folder
+    rm -r $DEPLOY_PATH
+    mkdir -p $DEPLOY_PATH/client
+
+    # Package the application (builds server and client before zipping)
+    echo -n "Packing application..."
+    OUTPUT=$(
+        cd "$SPOKE_PATH"
+        export NODE_ENV=production
+        export OUTPUT_DIR="./build"
+        export PUBLIC_DIR="./build/client"
+        export ASSETS_DIR="./build/client/assets"
+        export STATIC_BASE_URL="https://s3.${AWS_REGION}.amazonaws.com/${S3_BUCKET}/static/"
+        export BASE_URL="https://${SPOKE_DOMAIN}"
+        export ASSETS_MAP_FILE="assets.json"
+        claudia pack --output $TMP_ZIP_PATH 2>&1
+    )
+    if [ $? -eq 0 ]; then echo " done"; else
+        echo " error"
+        mkdir -p "$LOG_LOCATION"
+        CLAUDIA_LOG_LOCATION="$LOG_LOCATION/claudia-log.txt"
+        echo "$OUTPUT" > "$CLAUDIA_LOG_LOCATION"
+        echo "For details see: $CLAUDIA_LOG_LOCATION"
+        exit 1
+    fi
+}   # end of build_spoke
+
+gather_bundle()
+{
+    # Locate client bundle in .zip
+    BUNDLE_PATH=$(unzip -l $TMP_ZIP_PATH | grep "build/client/assets/bundle" | awk '{print $4}')
+    BUNDLE_FILENAME=$(basename -- "$BUNDLE_PATH")
+    BUNDLE_HASH=`echo "$BUNDLE_FILENAME" | cut -d '.' -f 2`
+
+    # Rename server.zip with hash for uniqueness
+    SERVER_ZIP_PATH=$DEPLOY_PATH/server.$BUNDLE_HASH.zip
+    cp $TMP_ZIP_PATH $SERVER_ZIP_PATH
+
+    # Extract client bundle
+    echo -n "Extracting client bundle for separate upload..."
+    unzip -j $SERVER_ZIP_PATH $BUNDLE_PATH -d $DEPLOY_PATH/client/ > /dev/null
+    echo " done"
+}   # end of gather_bundle
+
+terraform_command()
+{
+    local builder="terraform apply -var 'bundle_hash=$BUNDLE_HASH'"
+    if [ $AUTO_YES = "1" ]; then
+       builder="$builder -auto-approve"
+    fi
+    echo "$builder"
+}   # end of terraform_command
+
+success_message()
+{
+    echo "
+Bundling complete.
+
+Your bundle files are:
+
+    $SERVER_ZIP_PATH
+    $DEPLOY_PATH/client/$BUNDLE_FILENAME
+
+You may apply the changes with:
+
+    $(terraform_command)
+"
+}   # end of success_message
 
 usage()
 {
@@ -42,67 +108,63 @@ Usage: $0 [options]
                                        This is needed during webpack compilation.
                                        Defaults to the domain name.
     -r | --region [region]  (optional) The AWS region to deploy in. Defaults to 'us-east-1'.
+    -l | --logs [path]      (optional) Path where logs should be stored. Defaults to $PWD/logs.
     -a | --auto-deploy      (optional) If set, script will call 'terraform apply' with appropriate
                                        options rather than just printing the command.
     -y | --yes              (optional) If set, script will assume "yes" to any input prompts.
     -h | --help             Display this help text.
 EOF
-    exit 0
 }   # end of usage
 
 ##### Main
 
-# Clear out deploy folder
-rm -r $DEPLOY_PATH
-mkdir -p $DEPLOY_PATH/client
+# Process positional paramters
+# Source: http://linuxcommand.org/lc3_wss0120.php
+while [ "$1" != "" ]; do
+    case $1 in
+        -h | --help )           usage
+                                exit 0
+                                ;;
+        -p | --path )           shift
+                                SPOKE_PATH=$1
+                                ;;
+        -d | --domain )         shift
+                                SPOKE_DOMAIN=$1
+                                ;;
+        -b | --bucket )         shift
+                                S3_BUCKET=$1
+                                ;;
+        -r | --region )         shift
+                                AWS_REGION=$1
+                                ;;
+        -l | --logs )           shift
+                                LOG_LOCATION=$1
+                                ;;
+        -a | --auto-deploy )    AUTO_DEPLOY=1
+                                ;;
+        -y | --yes )            AUTO_YES=1
+                                ;;
+        * )                     echo "Unrecognized option $1. See usage:"
+                                echo ""
+                                usage
+                                exit 1
+    esac
+    shift
+done
 
-# Package the application (builds server and client before zipping)
-echo -n "Packing application..."
-(
-cd $SPOKE_PATH
-NODE_ENV=production \
-    OUTPUT_DIR="./build" \
-    PUBLIC_DIR="./build/client" \
-    ASSETS_DIR="./build/client/assets" \
-    STATIC_BASE_URL="https://s3.${AWS_REGION}.amazonaws.com/${S3_BUCKET}/static/" \
-    BASE_URL="https://${SPOKE_DOMAIN}" \
-    ASSETS_MAP_FILE="assets.json" \
-    claudia pack --output $TMP_ZIP_PATH > /dev/null
-)
-echo " done"
+# Ensure required variables are present
+if [ -z ${SPOKE_PATH} ]; then echo "You must provide the Spoke path!" && exit 1 ; fi
+if [ -z ${SPOKE_DOMAIN} ]; then echo "You must provide the Spoke domain!" && exit 1 ; fi
 
-# Locate client bundle in .zip
-BUNDLE_PATH=$(unzip -l $TMP_ZIP_PATH | grep "build/client/assets/bundle" | awk '{print $4}')
-BUNDLE_FILENAME=$(basename -- "$BUNDLE_PATH")
-BUNDLE_HASH=`echo "$BUNDLE_FILENAME" | cut -d '.' -f 2`
+# Fall back on default values
+if [ -z ${S3_BUCKET} ]; then S3_BUCKET="$SPOKE_DOMAIN"; fi
 
-# Rename server.zip with hash for uniqueness
-SERVER_ZIP_PATH=$DEPLOY_PATH/server.$BUNDLE_HASH.zip
-cp $TMP_ZIP_PATH $SERVER_ZIP_PATH
+# Build Spoke
+build_spoke
+gather_bundle
 
-# Extract client bundle
-echo -n "Extracting client bundle for separate upload..."
-unzip -j $SERVER_ZIP_PATH $BUNDLE_PATH -d $DEPLOY_PATH/client/ > /dev/null
-echo " done"
-
-SUCCESS_MESSAGE="
-Bundling complete.
-
-Your bundle files are:
-
-    $SERVER_ZIP_PATH
-    $DEPLOY_PATH/client/$BUNDLE_FILENAME
-
-You may apply the changes with:
-
-    terraform apply -var 'bundle_hash=$BUNDLE_HASH'
-"
-
-# TODO: Add real flag for running it automatically
-RUN_AUTOMATICALLY=false
-
-if [ $RUN_AUTOMATICALLY = true ]; then
-   echo "Run 'terraform apply' automatically"
+if [ $AUTO_DEPLOY = "1" ]; then
+   eval $(terraform_command)
 else
-    echo "$SUCCESS_MESSAGE"
+    success_message
 fi

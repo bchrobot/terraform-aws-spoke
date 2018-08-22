@@ -1,6 +1,8 @@
+# Build artifacts
 .deploy/
 
-
+# Default Logging
+logs/*
 
 
 # Created by https://www.gitignore.io/api/macos,linux,windows,terraform
