@@ -21,7 +21,7 @@ $ cp ./terraform.tfvars.example ./terraform.tfvars
 $ vi ./terraform.tfvars
 ```
 
-For most installations, this will be enough. For the complete list of configuration options, however, see [`variables.tf`](blob/master/variables.tf).
+For most installations, this will be enough. For the complete list of configuration options, however, see [`variables.tf`](variables.tf).
 
 **Initialize Terraform**
 
