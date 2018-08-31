@@ -161,17 +161,17 @@ while [ "$1" != "" ]; do
 done
 
 # Ensure required variables are present
-if [ -z ${SPOKE_PATH} ]; then echo "You must provide the Spoke path!" && exit 1 ; fi
-if [ -z ${SPOKE_DOMAIN} ]; then echo "You must provide the Spoke domain!" && exit 1 ; fi
+if [[ -z ${SPOKE_PATH} ]]; then echo "You must provide the Spoke path!" && exit 1 ; fi
+if [[ -z ${SPOKE_DOMAIN} ]]; then echo "You must provide the Spoke domain!" && exit 1 ; fi
 
 # Fall back on default values
-if [ -z ${S3_BUCKET} ]; then S3_BUCKET="$SPOKE_DOMAIN"; fi
+if [[ -z ${S3_BUCKET} ]]; then S3_BUCKET="$SPOKE_DOMAIN"; fi
 
 # Build Spoke
 build_spoke
 gather_bundle
 
-if [ $AUTO_DEPLOY = "1" ]; then
+if [[ $AUTO_DEPLOY = "1" ]]; then
    eval $(terraform_command)
 else
     success_message
