@@ -18,5 +18,5 @@ output "S3 Bucket Name" {
 }
 
 output "Base API Gateway URL" {
-  value = "${aws_api_gateway_deployment.spoke.invoke_url}"
+  value = "${module.api_gateway.gateway_url}"
 }
