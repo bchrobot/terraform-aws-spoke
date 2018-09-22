@@ -248,75 +248,15 @@ resource "aws_security_group" "lambda" {
   }
 }
 
-# Postgres RDS
-resource "aws_security_group" "postgres" {
-  name        = "postgres"
-  description = "Allow all inbound Postgres traffic"
-  vpc_id      = "${aws_vpc.spoke_vpc.id}"
 
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    self        = true
-    description = "Postgres access"
-  }
+# Postgres RDS instance
+module "postgres" {
+  source = "./modules/rds_postgres"
 
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Postgres traffic from anywhere"
-  }
-
-  egress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    cidr_blocks     = ["0.0.0.0/0"]
-  }
-
-  tags {
-    Name = "Spoke Postgres"
-  }
+  vpc_id        = "${aws_vpc.spoke_vpc.id}"
+  subnet_ids    = ["${aws_subnet.public_a.id}", "${aws_subnet.public_b.id}"]
+  rds_password  = "${var.rds_password}"
 }
-
-
-
-# Create RDS Subnet Group
-# Source: https://www.terraform.io/docs/providers/aws/r/db_subnet_group.html
-resource "aws_db_subnet_group" "postgres" {
-  name       = "postgres"
-  subnet_ids = ["${aws_subnet.public_a.id}", "${aws_subnet.public_b.id}"]
-
-  tags {
-    Name = "Spoke Postgres"
-  }
-}
-
-
-
-# Create RDS Postgres instance
-# Source: https://www.terraform.io/docs/providers/aws/r/db_instance.html
-resource "aws_db_instance" "spoke" {
-  allocated_storage      = "${var.rds_size}"
-  storage_type           = "gp2"
-  engine                 = "postgres"
-  engine_version         = "10.4"
-  instance_class         = "${var.rds_class}"
-  name                   = "${var.rds_dbname}"
-  port                   = "${var.rds_port}"
-  username               = "${var.rds_username}"
-  password               = "${var.rds_password}"
-  option_group_name      = "default:postgres-10"
-  parameter_group_name   = "default.postgres10"
-  publicly_accessible    = true
-  skip_final_snapshot    = true
-  db_subnet_group_name   = "${aws_db_subnet_group.postgres.name}"
-  vpc_security_group_ids = ["${aws_security_group.postgres.id}"]
-}
-
 
 
 # Create Lambda Role
@@ -458,10 +398,10 @@ resource "aws_lambda_function" "spoke" {
       BASE_URL = "https://${var.spoke_domain}"
       S3_STATIC_PATH = "s3://${var.s3_bucket_name}/static/"
       ASSETS_MAP_FILE = "assets.json"
-      DB_HOST = "${aws_db_instance.spoke.address}"
-      DB_PORT = "${aws_db_instance.spoke.port}"
-      DB_NAME = "${aws_db_instance.spoke.name}"
-      DB_USER = "${aws_db_instance.spoke.username}"
+      DB_HOST = "${module.postgres.address}"
+      DB_PORT = "${module.postgres.port}"
+      DB_NAME = "${module.postgres.name}"
+      DB_USER = "${module.postgres.username}"
       DB_PASSWORD = "${var.rds_password}"
       DB_TYPE = "pg"
       DB_KEY = ""

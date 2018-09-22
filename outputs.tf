@@ -6,7 +6,7 @@
 # Source: https://www.terraform.io/intro/getting-started/outputs.html
 
 output "RDS Host Address" {
-  value = "${aws_db_instance.spoke.address}"
+  value = "${module.postgres.address}"
 }
 
 output "Bundle Hash" {
