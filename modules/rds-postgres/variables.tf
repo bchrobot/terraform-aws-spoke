@@ -1,3 +1,7 @@
+# -----------------------
+# AWS Variables
+# -----------------------
+
 variable "vpc_id" {
   type        = "string"
   description = "The ID of the VPC to create the Postgres instance within. Example: aws_vpc.spoke_vpc.id"
@@ -7,6 +11,17 @@ variable "subnet_ids" {
   type        = "list"
   description = "A list of subnet IDs to add the Postgres instance to. Example: ['${aws_subnet.public_a.id}', '${aws_subnet.public_b.id}']"
 }
+
+variable "publicly_accessible" {
+  type        = "string"
+  description = "Whether the RDS instance shall be publicly accessible."
+  default     = "1"
+}
+
+
+# -----------------------
+# Database Variables
+# -----------------------
 
 variable "rds_class" {
   type        = "string"
@@ -40,10 +55,4 @@ variable "rds_username" {
 variable "rds_password" {
   type        = "string"
   description = "The password for the Postgres instance user."
-}
-
-variable "publicly_accessible" {
-  type        = "string"
-  description = "Whether the RDS instance shall be publicly accessible."
-  default     = "1"
 }

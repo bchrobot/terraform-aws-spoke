@@ -251,7 +251,7 @@ resource "aws_security_group" "lambda" {
 
 # Postgres RDS instance
 module "postgres" {
-  source = "./modules/rds_postgres"
+  source = "./modules/rds-postgres"
 
   vpc_id        = "${aws_vpc.spoke_vpc.id}"
   subnet_ids    = ["${aws_subnet.public_a.id}", "${aws_subnet.public_b.id}"]
