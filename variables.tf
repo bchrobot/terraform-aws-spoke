@@ -22,7 +22,7 @@ variable "aws_region" {
 }
 
 variable "s3_bucket_name" {
-  description = "Create a globally unique S3 bucket. Usually the same as the domain: spoke.example.com"
+  description = "Create a globally unique S3 bucket. Usually the same as spoke_domain: spoke.example.com"
 }
 
 variable "rds_size" {

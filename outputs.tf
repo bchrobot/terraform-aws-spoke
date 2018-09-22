@@ -5,7 +5,7 @@
 # 
 # Source: https://www.terraform.io/intro/getting-started/outputs.html
 
-output "RDS Host" {
+output "RDS Host Address" {
   value = "${aws_db_instance.spoke.address}"
 }
 
