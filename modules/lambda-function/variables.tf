@@ -1,46 +1,70 @@
-# Spoke Variables
-# 
-# Customize these for your Spoke deployment.
-# 
-# Source: https://www.terraform.io/intro/getting-started/variables.html
-
-
-########################
-# AWS Deploy Variables #
-########################
-
-variable "aws_access_key" {
-  description = "AWS Access Key."
-}
-
-variable "aws_secret_key" {
-  description = "AWS Secret Key."
-}
+# -----------------------
+# Lambda Function Variables
+# -----------------------
 
 variable "aws_region" {
+  type        = "string"
   description = "AWS region to launch servers. Ex. us-east-1"
 }
 
-variable "s3_bucket_name" {
-  description = "Create a globally unique S3 bucket. Usually the same as spoke_domain: spoke.example.com"
+variable "vpc_id" {
+  type        = "string"
+  description = "ID of the VPC the Spoke function should belong to."
 }
 
-variable "rds_password" {
+variable "subnet_ids" {
+  type        = "list"
+  description = "IDs of the subnets the Lambda function should belong to."
+}
+
+variable "depends_on" {
+  type        = "list"
+  description = "Resources the Lambda function depends on. Usually an S3 upload resource."
+  default     = []
+}
+
+variable "s3_bucket_name" {
+  type        = "string"
+  description = "The name of the S3 bucket where the server bundle resides."
+}
+
+variable "s3_key" {
+  type        = "string"
+  description = "S3 key of the server bundle."
+}
+
+variable "source_code_hash" {
+  type        = "string"
+  description = "Hash of server bundle. Used to determine if source code has changed and function needs updating."
+}
+
+# RDS
+
+variable "db_host" {
+  type        = "string"
+  description = "The address of the Postgres instance."
+}
+
+variable "db_port" {
+  type        = "string"
+  description = "The port the Postgres instance will listen on."
+}
+
+variable "db_name" {
+  type        = "string"
+  description = "The DB name for the Postgres instance."
+}
+
+variable "db_user" {
+  type        = "string"
+  description = "The username for the Postgres instance."
+}
+
+variable "db_password" {
   type        = "string"
   description = "The password for the Postgres instance user."
 }
 
-variable "server_bundle_location" {
-  description = "Path of packed server.zip"
-}
-
-variable "client_bundle_location" {
-  description = "Path of compiled bundle.[hash].js"
-}
-
-variable "client_bundle_hash" {
-  description = "Hash of client bundle.js."
-}
 
 # -----------------------
 # Spoke Variables
