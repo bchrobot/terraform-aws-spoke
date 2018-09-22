@@ -25,32 +25,8 @@ variable "s3_bucket_name" {
   description = "Create a globally unique S3 bucket. Usually the same as spoke_domain: spoke.example.com"
 }
 
-variable "rds_size" {
-  description = "The storage size in gibibytes for the Postgres RDS instance."
-  default     = 30
-}
-
-variable "rds_class" {
-  description = "The RDS class for the instance."
-  default     = "db.t2.medium"
-}
-
-variable "rds_dbname" {
-  description = "The DB name for the Postgres instance."
-  default     = "spoke_prod"
-}
-
-variable "rds_port" {
-  description = "The port the Postgres instance will listen on."
-  default     = "5432"
-}
-
-variable "rds_username" {
-  description = "The username for the Postgres instance."
-  default     = "spoke"
-}
-
 variable "rds_password" {
+  type        = "string"
   description = "The password for the Postgres instance user."
 }
 
