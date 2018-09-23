@@ -29,6 +29,12 @@ variable "rds_class" {
   default     = "db.t2.medium"
 }
 
+variable "rds_identifier" {
+  type        = "string"
+  description = "The name of the RDS instance."
+  default     = "spoke_db"
+}
+
 variable "rds_size" {
   description = "The storage size in gibibytes for the Postgres RDS instance."
   default     = 30

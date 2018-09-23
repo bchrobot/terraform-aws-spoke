@@ -59,6 +59,7 @@ resource "aws_db_subnet_group" "postgres" {
 # Create RDS Postgres instance
 # Source: https://www.terraform.io/docs/providers/aws/r/db_instance.html
 resource "aws_db_instance" "spoke" {
+  identifier             = "${var.rds_identifier}"
   allocated_storage      = "${var.rds_size}"
   storage_type           = "gp2"
   engine                 = "postgres"
