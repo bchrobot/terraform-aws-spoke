@@ -245,7 +245,6 @@ resource "aws_s3_bucket_object" "server_payload" {
 module "lambda" {
   source = "./modules/lambda-function"
 
-  depends_on  = ["aws_s3_bucket_object.server_payload"]
   vpc_id      = "${aws_vpc.spoke_vpc.id}"
   subnet_ids  = ["${aws_subnet.private_a.id}", "${aws_subnet.private_b.id}"]
   aws_region  = "${var.aws_region}"
@@ -296,6 +295,8 @@ module "lambda" {
 
   spoke_rollbar_client_token = "${var.spoke_rollbar_client_token}"
   spoke_rollbar_endpoint = "${var.spoke_rollbar_endpoint}"
+
+  fake_depends_on  = ["${aws_s3_bucket_object.server_payload.id}"]
 }
 
 module "api_gateway" {

@@ -2,6 +2,12 @@
 # Lambda Function Variables
 # -----------------------
 
+variable "fake_depends_on" {
+  type        = "list"
+  description = "https://github.com/hashicorp/terraform/issues/1178#issuecomment-105613781"
+  default     = []
+}
+
 variable "aws_region" {
   type        = "string"
   description = "AWS region to launch servers. Ex. us-east-1"
@@ -15,12 +21,6 @@ variable "vpc_id" {
 variable "subnet_ids" {
   type        = "list"
   description = "IDs of the subnets the Lambda function should belong to."
-}
-
-variable "depends_on" {
-  type        = "list"
-  description = "Resources the Lambda function depends on. Usually an S3 upload resource."
-  default     = []
 }
 
 variable "s3_bucket_name" {
