@@ -5,18 +5,22 @@
 # 
 # Source: https://www.terraform.io/intro/getting-started/outputs.html
 
-output "RDS Host Address" {
-  value = "${module.postgres.address}"
+output "rds_host_address" {
+  description = "RDS Host Address"
+  value       = "${module.postgres.address}"
 }
 
-output "Bundle Hash" {
-  value = "${var.client_bundle_hash}"
+output "api_url" {
+  description = "Base API Gateway URL. Needed to set DNS record."
+  value       = "${module.api_gateway.gateway_url}"
 }
 
-output "S3 Bucket Name" {
-  value = "${var.spoke_domain}"
+output "bundle_hash" {
+  description = "The bundle hash for ease of reployment without rebuilding source."
+  value       = "${var.client_bundle_hash}"
 }
 
-output "Base API Gateway URL" {
-  value = "${module.api_gateway.gateway_url}"
+output "s3_bucket_name" {
+  description = "S3 Bucket Name"
+  value       = "${var.spoke_domain}"
 }
