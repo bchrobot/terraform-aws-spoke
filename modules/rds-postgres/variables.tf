@@ -32,7 +32,7 @@ variable "rds_class" {
 variable "rds_identifier" {
   type        = "string"
   description = "The name of the RDS instance."
-  default     = "spoke_db"
+  default     = "spokedb"
 }
 
 variable "rds_size" {

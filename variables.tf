@@ -68,7 +68,6 @@ variable "spoke_suppress_self_invite" {
 variable "spoke_session_secret" {
   type        = "string"
   description = "Session secret."
-  default     = ""
 }
 
 variable "spoke_timezone" {
