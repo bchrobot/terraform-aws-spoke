@@ -9,7 +9,7 @@ variable "vpc_id" {
 
 variable "subnet_ids" {
   type        = "list"
-  description = "A list of subnet IDs to add the Postgres instance to. Example: ['${aws_subnet.public_a.id}', '${aws_subnet.public_b.id}']"
+  description = "A list of subnet IDs to add the Postgres instance to. Example: ['$${aws_subnet.public_a.id}', '$${aws_subnet.public_b.id}']"
 }
 
 variable "publicly_accessible" {
